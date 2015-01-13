@@ -30,7 +30,7 @@ var connectedClientIDs = [ ];
 // we hebben geen aparte playersIDlist nodig, want de player ID komt ALTIJD overeen met de positie in de players-list
 var players = [ ];
 var rollenInStapel = [ ];
-var varwijderdeRolAanBegin = -1;
+var verwijderdeRolAanBegin = -1;
 var gameIsOngoing = false;
 var activePlayerID = -1;
 var actieveRol = -1;
@@ -38,9 +38,6 @@ var wachtOpDoelwit = false;
 var doelwitPlayerID = -1;
 var wachtOpGuardKeuze = false;
 var geradenRol = -1;
-
-// de variabele 'lastClientID' houdt bij wat de meest recent toegekende client ID is, en begint bij 0.
-var lastClientID = 0;
 
 // 'CALLBACK'-FUNCTIE VOOR NIEUWE CONNECTIES
 
@@ -75,7 +72,11 @@ wss.on('connection', function(connection) {
 
     // STUUR ALLE RELEVANTE GEDEELDE INFORMATIE NAAR DE NIEUWE CLIENT
 
-    
+    // kijk eerst of er nog een speler is zonder connectie
+
+    // zo ja, start dan het spel en stuur een voor een alle relevante stukjes info
+
+
     
     // FUNCTIE VOOR HET VERWERKEN VAN NIEUWE BERICHTEN VAN CLIENTS (wordt alleen uitgevoerd op het moment dat de client een bericht stuurt)
 
@@ -139,14 +140,23 @@ wss.on('connection', function(connection) {
 function startGame(){
     console.log("Het spel wordt gestart!");
 
-    players = [];
+    stuurJSONbericht('resetGame',players,{});
+
+    players = [ ];
+    gameIsOngoing = false;
+    activePlayerID = -1;
+    actieveRol = -1;
+    wachtOpDoelwit = false;
+    doelwitPlayerID = -1;
+    wachtOpGuardKeuze = false;
+    geradenRol = -1;
 
     // Schud de rollen
     rollenInStapel = [ 1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8 ];
     rollenInStapel.sort(function(a,b) { return Math.random() > 0.5; } );
 
     // Haal eerste rol uit de stapel
-    var verwijderdeRolAanBegin = haalRolVanStapel();
+    verwijderdeRolAanBegin = haalRolVanStapel();
     console.log('Rol ' + verwijderdeRolAanBegin + ' is uit het spel verwijderd');
 
     // Ga de user IDs af, maak voor iedere user een player-object aan en geef de nieuwe speler een rol

@@ -104,6 +104,10 @@ $(function () {
         // wat ie ermee moet doen. We gaan hieronder simpelweg alle bekende mogelijkheden voor het 'type' af.
 
         switch(json.type) {
+            case 'resetGame':
+                resetGame();
+                break;
+
             case 'receivePlayerID':
                 receivePlayerID(json.data.nieuweID);
                 break;
@@ -252,6 +256,23 @@ $(function () {
             
             playerListDiv.appendChild(playerNameDiv);
         }
+    }
+
+    function resetGame(){
+        // verwijder kaarten en spelers
+        $("#playArea").children(".card").remove();
+        $("#sidebar").children(".playerName").remove();
+
+        // haal de notificaties weg
+        gameInfoBoxP.innerHTML = "";
+
+        // toon startknop
+        startButtonDiv.style.display = "block";
+
+        myPlayerID = -1;
+        iAmActive = false;
+        myCards = [];
+        myRoles = [];
     }
 
     function spelStart(){

@@ -25,10 +25,11 @@ var rolNamen = ['Guard','Priest','Baron','Handmaid','Prince','King','Countess','
 
 // de variabele 'clients' is een lijst met daarin alle verbonden clients. Deze heb je nodig als je berichten wilt versturen.
 var clients = [ ];
-var connectedClientIDs = [ ];
+var lastClientID = 0;
 
 // we hebben geen aparte playersIDlist nodig, want de player ID komt ALTIJD overeen met de positie in de players-list
 var players = [ ];
+var playerNames = [ ];
 var rollenInStapel = [ ];
 var verwijderdeRolAanBegin = -1;
 var gameIsOngoing = false;
@@ -53,31 +54,15 @@ wss.on('connection', function(connection) {
   // SEMI-GLOBALE VARIABELEN (worden apart bijgehouden PER client)
     
     // Voeg de client toe aan het globale lijstje met clients. Onthoud de index als semi-globale variabele.
-    var index = clients.push(connection) - 1;
+    var myName = null;
+    lastClientID++;
+    var clientID = lastClientID;
 
-    // De nieuwe user krijgt de eerste nog niet toegewezen user ID. 
-    // Daarvoor gaan we een voor een de mogelijke user ids af, beginnend bij 1, en kijken of die al bestaat in het lijstje met actieve userIDs
-    var clientIDisFree = false;
-    var clientID = 1;
-    while (! clientIDisFree) {
-        if (connectedClientIDs.indexOf(clientID) == -1) {
-            clientIDisFree = true;
-        }
-        else { 
-            clientID++;
-        }
-    }
+    var myClientObject = addClient(connection,clientID);
 
-    connectedClientIDs.push(clientID);
+    var json = JSON.stringify({ type: 'askName', data: {}});
+    connection.send(json);
 
-    // STUUR ALLE RELEVANTE GEDEELDE INFORMATIE NAAR DE NIEUWE CLIENT
-
-    // kijk eerst of er nog een speler is zonder connectie
-
-    // zo ja, start dan het spel en stuur een voor een alle relevante stukjes info
-
-
-    
     // FUNCTIE VOOR HET VERWERKEN VAN NIEUWE BERICHTEN VAN CLIENTS (wordt alleen uitgevoerd op het moment dat de client een bericht stuurt)
 
     connection.on('message', function message(message) {
@@ -100,8 +85,22 @@ wss.on('connection', function(connection) {
         }
 
         switch(json.type) {
+            case 'enteredName':
+                myName = json.data.enteredName;
+                var clientIndex = 0;
+                while(clients[clientIndex].clientID != clientID) {
+                    clientIndex++;
+                }
+                clients[clientIndex].clientname = myName;
+                enteredName(myClientObject,myName);
+                break;
+
             case 'start':
                 startGame();
+                break;
+
+            case 'stop':
+                resetGame();
                 break;
 
             case 'kaartKlik':
@@ -124,32 +123,46 @@ wss.on('connection', function(connection) {
     // FUNCTIE ALS DEZE VERBINDING WORDT VERBROKEN
     connection.on('close', function() {
         // zoek de index van de userID in het lijstje userIDs
-        var myCurrentIndex = connectedClientIDs.indexOf(clientID);
+        var clientIndex = 0;
+        while(clients[clientIndex].clientID != clientID) {
+            clientIndex++;
+        }
 
         // Haal de client uit het globale lijstje met clients, en ook de user ID uit het lijstje met actieve user IDs.
-        clients.splice(myCurrentIndex, 1);
-        connectedClientIDs.splice(myCurrentIndex, 1);
+        
+        clients.splice(clientIndex, 1);
 
         // Zet een berichtje in de console
         console.log("User " + clientID + " is er vandoor");
+        stuurAlgemeenBericht('generalinfo',clients,{bericht: huidigeTijd() + ' De verbinding met ' + myName + ' is verbroken.'});
+
+        if (gameIsOngoing) {
+            resetGame();
+            stuurAlgemeenBericht('generalinfo',clients,{bericht: huidigeTijd() + ' Het spel is gestopt door een verbroken verbinding.'});
+        }
     });
 });
 
 // FUNCTIES DIRECT GEKOPPELD AAN BINNENKOMENDE BERICHTEN (=GEBRUIKERSINPUT)
 
+function enteredName(myClientObject,newName){
+    stuurAlgemeenBericht('generalinfo',clients,{bericht: huidigeTijd() + ' ' + newName + ' is net ingelogd'});
+    
+    if(gameIsOngoing) {
+        stuurAlgemeenBericht('generalinfo',myClientObject,{bericht: huidigeTijd() + ' Er is een spel bezig. Heel even wachten graag.'});
+    }
+}
+
 function startGame(){
+    if (gameIsOngoing){
+        return;
+    }
+
+    resetGame();
+
     console.log("Het spel wordt gestart!");
 
-    stuurJSONbericht('resetGame',players,{});
-
-    players = [ ];
-    gameIsOngoing = false;
-    activePlayerID = -1;
-    actieveRol = -1;
-    wachtOpDoelwit = false;
-    doelwitPlayerID = -1;
-    wachtOpGuardKeuze = false;
-    geradenRol = -1;
+    gameIsOngoing = true;
 
     // Schud de rollen
     rollenInStapel = [ 1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8 ];
@@ -160,7 +173,7 @@ function startGame(){
     console.log('Rol ' + verwijderdeRolAanBegin + ' is uit het spel verwijderd');
 
     // Ga de user IDs af, maak voor iedere user een player-object aan en geef de nieuwe speler een rol
-    for (var i=0; i < connectedClientIDs.length; i++) {
+    for (var i=0; i < clients.length; i++) {
         addPlayer(i);
     }
 
@@ -168,7 +181,7 @@ function startGame(){
     clearPlayerList();
     sendPlayerList();
 
-    stuurJSONbericht('spelStart',players,{});
+    stuurSpelBericht('spelStart',players,{});
 
     // Geef iedereen een rol
     var nieuweRol = -1;
@@ -185,8 +198,23 @@ function startGame(){
     startTurn();
 
     console.log("Het spel is gestart!");
-    stuurJSONbericht('gameinfo', players ,{bericht: ''});
-    stuurJSONbericht('gameinfo', players ,{bericht: 'Het spel is gestart!'});
+    stuurSpelBericht('generalinfo', players ,{bericht: huidigeTijd() + ' Het spel is gestart!'});
+}
+
+function resetGame(){
+    stuurSpelBericht('resetGame',players,{});
+
+    players = [ ];
+    playerNames = [ ];
+    gameIsOngoing = false;
+    activePlayerID = -1;
+    actieveRol = -1;
+    wachtOpDoelwit = false;
+    doelwitPlayerID = -1;
+    wachtOpGuardKeuze = false;
+    geradenRol = -1;
+
+    console.log(clients.length);
 }
 
 function kaartKlik(playerID,rol) {
@@ -210,7 +238,7 @@ function kaartKlik(playerID,rol) {
     
         if ([1,2,3,5,6].indexOf(rol) != - 1) {
             wachtOpDoelwit = true;
-            stuurJSONbericht('wachtOpDoelwit', player ,{rol:rol});
+            stuurSpelBericht('wachtOpDoelwit', player ,{rol:rol});
         }
 
         else {
@@ -228,7 +256,7 @@ function doelwitKeuze(playerID,gekozenDoelwitPlayerID) {
         
             if (actieveRol == 1 && activePlayerID != doelwitPlayerID) {
                 wachtOpGuardKeuze = true;
-                stuurJSONbericht('wachtOpRolKeuzeVoorGuard', players[activePlayerID] ,{doelwitPlayerID:doelwitPlayerID});
+                stuurSpelBericht('wachtOpRolKeuzeVoorGuard', players[activePlayerID] ,{doelwitPlayerID:doelwitPlayerID});
             }
             else {
                 voerRolUit();
@@ -263,7 +291,7 @@ function valideerDoelwitKeuze(gekozenDoelwitPlayerID) {
     var activePlayer = players[activePlayerID];
     if (geldigeKeuze) {
         doelwitPlayerID = gekozenDoelwitPlayerID;
-        stuurJSONbericht('doelwitKeuzeWasGeldig', activePlayer ,{});
+        stuurSpelBericht('doelwitKeuzeWasGeldig', activePlayer ,{});
     }
 
     return geldigeKeuze;
@@ -296,7 +324,7 @@ function voerRolUit() {
     // Stuur het berichtje naar de server-log en naar de clients
     consolebericht = consolebericht + '.';
     console.log(consolebericht);
-    stuurJSONbericht('gameinfo', players, {bericht: consolebericht});
+    stuurSpelBericht('gameinfo', players, {bericht: consolebericht});
 
     // Roep de functie aan die hoort bij de gekozen rol
     var rolFuncties = [playGuard,playPriest,playBaron,playHandmaid,playPrince,playKing,playCountess,playPrincess];
@@ -317,10 +345,10 @@ function playGuard() {
             // Zo ja, verwijder dan de rol van die speler. Dat triggert (later) automatisch dat die speler doodgaat.
             ontneemRolAanSpeler(geradenRol,doelwitPlayerID);
             legRolOpen(doelwitPlayerID,geradenRol);
-            stuurJSONbericht('gameinfo', ontvangers, {bericht: '>> De Guard had het goed in de smiezen! Speler ' + doelwitPlayerID + ' ligt uit het spel.'});
+            stuurSpelBericht('gameinfo', ontvangers, {bericht: '>> De Guard had het goed in de smiezen! Speler ' + doelwitPlayerID + ' ligt uit het spel.'});
         }
         else {
-            stuurJSONbericht('gameinfo', ontvangers, {bericht: '>> De Guard heeft verkeerd gegokt.'});
+            stuurSpelBericht('gameinfo', ontvangers, {bericht: '>> De Guard heeft verkeerd gegokt.'});
         }
     }
 }
@@ -330,7 +358,7 @@ function playPriest() {
     var doelwitRol = huidigeSpelerRol(doelwitPlayerID);
     
     var ontvanger = players[activePlayerID];
-    stuurJSONbericht('gameinfo', ontvanger, {bericht: '>> Geheim bericht: speler ' + doelwitPlayerID + ' heeft een ' + rolNaam(doelwitRol) + '!'});
+    stuurSpelBericht('gameinfo', ontvanger, {bericht: '>> Geheim bericht: speler ' + doelwitPlayerID + ' heeft een ' + rolNaam(doelwitRol) + '!'});
 }
 
 function playBaron() {
@@ -359,7 +387,7 @@ function playHandmaid() {
 
 function playPrince() {
     var targetPlayerRole = huidigeSpelerRol(doelwitPlayerID);
-    stuurJSONbericht('gameinfo',players,{bericht: '>> Speler '+ doelwitPlayerID + ' had een ' + rolNaam(targetPlayerRole) +'.'});
+    stuurSpelBericht('gameinfo',players,{bericht: '>> Speler '+ doelwitPlayerID + ' had een ' + rolNaam(targetPlayerRole) +'.'});
     
     ontneemRolAanSpeler(targetPlayerRole,doelwitPlayerID);
     legRolOpen(activePlayerID,targetPlayerRole);
@@ -382,7 +410,7 @@ function playKing(){
         geefRolAanSpeler(targetPlayerRole,activePlayerID);
         geefRolAanSpeler(activePlayerRole,doelwitPlayerID);
 
-        stuurJSONbericht('gameinfo',players,{bericht: '>> Speler ' + activePlayerID + ' en speler ' + doelwitPlayerID + ' hebben van rol gewisseld!'});
+        stuurSpelBericht('gameinfo',players,{bericht: '>> Speler ' + activePlayerID + ' en speler ' + doelwitPlayerID + ' hebben van rol gewisseld!'});
     }
 }
 
@@ -397,11 +425,22 @@ function playPrincess() {
 // ALGEMENE FUNCTIES VOOR SPELACTIES DIE NIET DIRECT GEKOPPELD ZIJN AAN BINNENKOMENDE BERICHTEN
 // Deze functies worden indirect aangeroepen door de server
 
+function addClient(connection,clientID){
+    var clientobj = {
+        connection: connection,
+        clientID: clientID,
+        clientname: '?',
+    };
+    clients.push(clientobj);
+
+    return clientobj;
+}
+
 function addPlayer(playerID){
     var playerobj = {
         playerID: playerID,
-        clientID: connectedClientIDs[playerID],
-        name: 'Player ' + playerID,
+        clientID: clients[playerID].clientID,
+        playerName: clients[playerID].clientname,
         alive: true,
         active: false,
         handmaid: false,
@@ -409,19 +448,20 @@ function addPlayer(playerID){
         openRollen: []
     };
     players.push(playerobj);
+    playerNames.push(playerobj.playerName);
 
     // Stuur de user ID in een berichtje naar de client (dit is nu overigens geen JSON-object, zou het misschien wel moeten zijn?!)
-    stuurJSONbericht('receivePlayerID',playerobj,{nieuweID: playerID});
+    stuurSpelBericht('receivePlayerID',playerobj,{nieuweID: playerID});
 }
 
 function sendPlayerList() {
-    stuurJSONbericht( 'createPlayerList',players,{aantalSpelers: players.length});
-    console.log('spelerlijst verzonden naar ' + connectedClientIDs.length + ' spelers');
+    stuurSpelBericht( 'createPlayerList',players,{namen:playerNames});
+    console.log('spelerlijst verzonden naar ' + players.length + ' spelers');
 }
 
 function clearPlayerList() {
-    stuurJSONbericht('clearPlayerList',players,{});
-    console.log(connectedClientIDs.length + ' spelers gevraagd om de spelerlijst te clearen')
+    stuurSpelBericht('clearPlayerList',players,{});
+    console.log(players.length + ' spelers gevraagd om de spelerlijst te clearen')
 }
 
 function startTurn(){
@@ -445,7 +485,7 @@ function geefRolAanSpeler(rol,playerID) {
     var player = players[playerID];
     player.mijnRollen.push(rol);
 
-    stuurJSONbericht( 'nieuweRol',player,{nieuweRol: rol});
+    stuurSpelBericht( 'nieuweRol',player,{nieuweRol: rol});
 
     console.log('speler ' + playerID + ' heeft rol ' + rol + '  ontvangen');
 }
@@ -456,7 +496,7 @@ function ontneemRolAanSpeler(rol,playerID){
     var indexVanRol = player.mijnRollen.indexOf(rol);
     player.mijnRollen.splice(indexVanRol,1);
 
-    stuurJSONbericht( 'leverRolIn',player,{rol:rol});
+    stuurSpelBericht( 'leverRolIn',player,{rol:rol});
 
     console.log('speler '  + playerID + ' heeft rol ' + rol + '  verwijderd');
 }
@@ -505,13 +545,13 @@ function endTurn(){
 
 function killPlayer(playerID){
     players[playerID].alive = false;
-    stuurJSONbericht( 'playerDied',players,{jsonPlayerID: playerID});
+    stuurSpelBericht( 'playerDied',players,{jsonPlayerID: playerID});
     console.log('speler ' + playerID + ' ligt eruit!');
-    stuurJSONbericht('gameinfo', players, {bericht: '>> Speler ' + playerID + ' ligt eruit!'});
+    stuurSpelBericht('gameinfo', players, {bericht: '>> Speler ' + playerID + ' ligt eruit!'});
 }
 
 function endGame(){
-    stuurJSONbericht('gameinfo', players, {bericht: 'Het spel is afgelopen!'});
+    stuurSpelBericht('gameinfo', players, {bericht: 'Het spel is afgelopen!'});
 
     var highestRoleLeft = -1;
     var hoogsteOpenRolSom = -1;
@@ -528,7 +568,7 @@ function endGame(){
             // sommeer de waarde van open rolllen
             var mijnOpenRolSom = player.openRollen.reduce(function(a,b){return a+b;});
 
-            stuurJSONbericht('gameinfo', players, {bericht: '>> Speler ' + i + ' heeft nog een ' + rolNaam(myLastRole)});
+            stuurSpelBericht('gameinfo', players, {bericht: '>> Speler ' + i + ' heeft nog een ' + rolNaam(myLastRole)});
 
             var ikStaVoor = false;
 
@@ -561,10 +601,12 @@ function endGame(){
 
     console.log(consolebericht);
 
-    stuurJSONbericht('gameinfo', players, {bericht: ''});
-    stuurJSONbericht('gameinfo', players, {bericht: consolebericht});
+    stuurSpelBericht('gameinfo', players, {bericht: ''});
+    stuurSpelBericht('gameinfo', players, {bericht: consolebericht});
 
-    stuurJSONbericht('gameEnd',players,{winnaar: winnerID});
+    stuurSpelBericht('gameEnd',players,{winnaar: winnerID});
+    stuurAlgemeenBericht('generalinfo',clients,{bericht: 'Het lopende spel is voorbij'});
+    gameIsOngoing = false;
 }
 
 function switchActivePlayer(spelGaatVerder){
@@ -593,19 +635,19 @@ function switchActivePlayer(spelGaatVerder){
     else {
         activePlayerID = -1;
     }
-    stuurJSONbericht('activePlayerChange',players,{newActivePlayerID:activePlayerID});
+    stuurSpelBericht('activePlayerChange',players,{newActivePlayerID:activePlayerID});
 }
 
 function switchImmunity(playerID,newImmunity){
     players[playerID].immune = newImmunity;
-    stuurJSONbericht( 'immunityChange',players,{playerID:playerID, newImmunity: newImmunity});
+    stuurSpelBericht( 'immunityChange',players,{playerID:playerID, newImmunity: newImmunity});
 }
 
 function haalRolVanStapel() {
     var rol = -1;
     if (rollenInStapel.length > 0) {
         rol = rollenInStapel.pop();
-        stuurJSONbericht('updateStapelVoorraad',players,{aantal: rollenInStapel.length});
+        stuurSpelBericht('updateStapelVoorraad',players,{aantal: rollenInStapel.length});
     }
     else {
         rol = verwijderdeRolAanBegin;
@@ -624,7 +666,20 @@ function rolNaam(rolID) {
     return rolNamen[rolID - 1];
 }
 
-function stuurJSONbericht(messageType,targetPlayerOrPlayers,messageObject) {
+function stuurAlgemeenBericht(messageType,targetClientOrClients,messageObject) {
+    var json = JSON.stringify({ type: messageType, data: messageObject})
+
+    if (!(targetClientOrClients instanceof Array)) {
+        targetClientOrClients = [targetClientOrClients];
+    }
+
+    for (var i=0; i<targetClientOrClients.length; i++) {
+        targetClientOrClients[i].connection.send(json);
+        console.log('verzonden! ' + messageType);
+    }
+}
+
+function stuurSpelBericht(messageType,targetPlayerOrPlayers,messageObject) {
     var json = JSON.stringify({ type: messageType, data: messageObject})
 
     if (!(targetPlayerOrPlayers instanceof Array)) {
@@ -634,9 +689,22 @@ function stuurJSONbericht(messageType,targetPlayerOrPlayers,messageObject) {
     for (var i=0; i < targetPlayerOrPlayers.length; i++) {
         var targetClientID = targetPlayerOrPlayers[i].clientID;
 
-        if (targetClientID <= connectedClientIDs.length) {
-            var clientIndex = connectedClientIDs.indexOf(targetClientID);
-            clients[clientIndex].send(json);
-        }        
+        for (var j=0; j < clients.length; j++) {
+            if (clients[j].clientID == targetClientID) {
+                clients[j].connection.send(json);
+            }
+        }    
     }
+}
+
+function huidigeTijd() {
+    var currentTime = new Date();
+    var hours = currentTime.getHours();
+    var minutes = currentTime.getMinutes();
+
+    if (minutes < 10) {
+        minutes = "0" + minutes; 
+    }
+
+    return hours + ":" + minutes;
 }

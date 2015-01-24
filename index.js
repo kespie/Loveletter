@@ -205,7 +205,7 @@ function startGame(){
 }
 
 function resetGame(){
-    stuurAlgemeenBericht('resetGame',players,{});
+    stuurAlgemeenBericht('resetGame',clients,{});
 
     players = [ ];
     playerNames = [ ];

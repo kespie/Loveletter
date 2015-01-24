@@ -127,7 +127,7 @@ body{
     border-bottom: 1px solid #636363;
     border-right: 1px solid #636363;
     border-radius: 10px;
-    background-image:url("images/0_cardback.PNG");
+    background-image:url("http://eelcobosklopper.com/Loveletter_afbeeldingen/0_cardback.PNG");
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -141,35 +141,35 @@ body{
 }
 
 .guard{
-    background-image:url("images/1_Guard.PNG");
+    background-image:url("http://eelcobosklopper.com/Loveletter_afbeeldingen/1_Guard.PNG");
 }
 
 .priest{
-    background-image:url("images/2_Priest.PNG");
+    background-image:url("http://eelcobosklopper.com/Loveletter_afbeeldingen/2_Priest.PNG");
 }
 
 .baron{
-    background-image:url("images/3_Baron.PNG");
+    background-image:url("http://eelcobosklopper.com/Loveletter_afbeeldingen/3_Baron.PNG");
 }
 
 .handmaid{
-    background-image:url("images/4_Handmaid.PNG");
+    background-image:url("http://eelcobosklopper.com/Loveletter_afbeeldingen/4_Handmaid.PNG");
 }
 
 .prince{
-    background-image:url("images/5_Prince.PNG");
+    background-image:url("http://eelcobosklopper.com/Loveletter_afbeeldingen/5_Prince.PNG");
 }
 
 .king{
-    background-image:url("images/6_King.PNG");
+    background-image:url("http://eelcobosklopper.com/Loveletter_afbeeldingen/6_King.PNG");
 }
 
 .countess{
-    background-image:url("images/7_Countess.PNG");
+    background-image:url("http://eelcobosklopper.com/Loveletter_afbeeldingen/7_Countess.PNG");
 }
 
 .princess{
-    background-image:url("images/8_Princess.PNG");
+    background-image:url("http://eelcobosklopper.com/Loveletter_afbeeldingen/8_Princess.PNG");
 }
 
 .cardUnavailable{

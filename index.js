@@ -205,7 +205,7 @@ function startGame(){
 }
 
 function resetGame(){
-    stuurSpelBericht('resetGame',players,{});
+    stuurAlgemeenBericht('resetGame',players,{});
 
     players = [ ];
     playerNames = [ ];

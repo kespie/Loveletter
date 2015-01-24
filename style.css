@@ -12,10 +12,11 @@ body{
 
 section{
     width:100%;
+    float:left;
 }
 
 section.top{
-    background:green;
+    /*background-color:blue;*/
 }
 
 .sidebar{
@@ -23,7 +24,10 @@ section.top{
 }
 
 .playArea{
-    
+    float: left;
+    width:100%;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 .guardArea{
@@ -48,9 +52,10 @@ section.top{
 }
 
 .gameControl{
-    width: 50%;
-    padding-top: 25px;
     float: left;
+    width:100%;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 .gameControl button{
@@ -118,22 +123,30 @@ section.top{
 
 .card{
     float:left;
-    height:auto;
     width:40%;
-    margin: 2,5%;
+    margin:2.5%;
+    padding-bottom:53.2%;
     text-align: center;
     background-repeat: no-repeat;
+    background-size:cover;
     box-shadow: 5px 5px 5px #888888;
     border-bottom: 1px solid #636363;
     border-right: 1px solid #636363;
     border-radius: 10px;
-    background-image:url("http://eelcobosklopper.com/Loveletter_afbeeldingen/0_cardback.PNG");
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+/* Dit is troep. Dit kunnen we netter doen */
+.cardfiller{
+    width: 0;
+    box-shadow: 5px 5px 5px #eee;
+    border-bottom: 1px solid #eee;
+    border-right: 1px solid #eee;
 }
 
 .card:hover{

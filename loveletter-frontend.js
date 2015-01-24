@@ -72,9 +72,8 @@ $(function () {
 
     // Het koppelen van eventlisteners aan de 7 guardbuttons (hebben dezelfde class) moet simpeler kunnen dan dit, maar goed het werkt iig:
     var guardButtons = guardAreaDiv.childNodes;
-    for (var i = 0; i < guardButtons.length; i++) { 
-        guardButtons[i].addEventListener("click",clickGuessedRoleForGuard,false);
-    }
+    
+    guardAreaDiv.onchange = guardRolGeselecteerd;
 
 // ALGEMENE FUNCTIES
 
@@ -224,14 +223,15 @@ $(function () {
         }
     }
 
-    function clickGuessedRoleForGuard(){
-        $("#guardArea").addClass("invisible");
-        notificatiebox.innerHTML = '';
+    function guardRolGeselecteerd(){ //run some code when "onchange" event fires
+        var geradenRolOption=this.options[this.selectedIndex] //this refers to "selectmenu"
+        var geradenRol = geradenRolOption.value;
+        if (geradenRol!="nothing"){
+            $("#guardArea").addClass("invisible");
+            notificatiebox.innerHTML = '';
 
-        var buttonID = (this.id);
-        var geradenRol = parseInt(buttonID.substr(11));
-
-        stuurJSONbericht('userGuardKeuze',{geradenRol:geradenRol});
+            stuurJSONbericht('userGuardKeuze',{geradenRol:parseInt(geradenRol)});
+        }
     }
 
 // FUNCTIES GEKOPPELD AAN SERVERINPUT

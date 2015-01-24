@@ -10,20 +10,20 @@ body{
     background:#eee;
 }
 
+section{
+    width:100%;
+}
+
+section.top{
+    background:green;
+}
+
 .sidebar{
-    min-height:100%;
-    width:19%;
-    float:left;
-    text-align: center;
-    border-right: solid 1px #000;
-    box-shadow: 5px 0px 5px #000;
-    background:#fff;
+    
 }
 
 .playArea{
-    height:100%;
-    width:80%;
-    float:left;
+    
 }
 
 .guardArea{
@@ -118,9 +118,9 @@ body{
 
 .card{
     float:left;
-    height:332px;
-    width:241px;
-    margin: 20px;
+    height:auto;
+    width:40%;
+    margin: 2,5%;
     text-align: center;
     background-repeat: no-repeat;
     box-shadow: 5px 5px 5px #888888;
@@ -178,14 +178,6 @@ body{
 
 
 /* ----- Notificaties  ----- */
-
-#gewonnen_bericht{
-    position: absolute;
-    text-align: center;
-    width: 60%;
-    font-size: 10em;
-    color: blue;
-}
 
 #notificatiebox{
     font-size: 1.5em;

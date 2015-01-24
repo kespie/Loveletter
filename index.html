@@ -4,16 +4,47 @@
 
     <script src="loveletter-frontend.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
-
-    <style>
-      
-    </style>
-
-    <script>
-      
-    </script>
   </head>
   <body>
+
+
+
+
+
+    <section class="top">
+        <div class="gameControl" id="startButton">
+            <button>Start</button>
+        </div>
+        <div class="playArea" id="playArea">
+
+        </div>
+    </section>
+
+    <section class="middle">
+        <div class="playerList" id="playerList">
+            <!-- hierbinnen worden divs toegevoegd voor de player names -->
+        </div>
+        <p class="infobox" id ="gameinfobox">
+            <!-- hierbinnen worden voortgangberichten gepost -->
+        </p>
+    </section>
+
+
+    <section class="bottom">
+        <p class="infobox" id ="generalinfobox">
+            <!-- hierbinnen worden voortgangberichten gepost -->
+        </p>
+        <div class="gameControl" id="stopButton">
+            <button>Stop</button>
+        </div>
+        <p id="notificatiebox"></p>
+    </section>
+
+
+
+
+
+
     <div class="sidebar">
             <div class ="sidebarheader">
                 <div class="cardsleft"><p id="cardsleft"></p></div>
@@ -54,6 +85,5 @@
             <p id="notificatiebox"></p>
         </div>
 
-        <p id="gewonnen_bericht"></p>
   </body>
 </html>

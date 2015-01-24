@@ -41,7 +41,6 @@ $(function () {
     var playerListDiv = document.getElementById("playerList");
     var playAreaDiv = document.getElementById("playArea");
     var cardsLeftDiv = document.getElementById("cardsleft");
-    var gewonnenBerichtP = document.getElementById("gewonnen_bericht");
     var guardAreaDiv = document.getElementById("guardArea");
     var generalInfoBoxP= document.getElementById("generalinfobox");
     var gameInfoBoxP= document.getElementById("gameinfobox");
@@ -309,7 +308,6 @@ $(function () {
         startButtonDiv.style.display = "none";
         stopButtonDiv.style.display = "block";
         gameInfoBoxP.innerHTML = "";
-        gewonnenBerichtP.innerHTML = "";
     }
 
     function updateStapelVoorraad(aantal) {
@@ -345,7 +343,7 @@ $(function () {
         cardDiv.innerHTML = rol;
         cardDiv.addEventListener("click",clickCard,false);
         
-        playAreaDiv.insertBefore(cardDiv,notificatiebox);
+        playAreaDiv.appendChild(cardDiv);
 
         myCards.push(cardDiv);
         myRoles.push(rol);

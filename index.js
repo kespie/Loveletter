@@ -374,7 +374,7 @@ function playBaron() {
     if (activePlayerRol > targetPlayerRol) {
         ontneemRolAanSpeler(targetPlayerRol,doelwitPlayerID);
         legRolOpen(doelwitPlayerID,targetPlayerRol);
-        stuurSpelBericht('gameinfo',players,{bericht: '>> '+ players[doelwitPlayerID].playerName + ' had een ' + rolNaam(targetPlayerRole) +'.'});
+        stuurSpelBericht('gameinfo',players,{bericht: '>> '+ players[doelwitPlayerID].playerName + ' had een ' + rolNaam(targetPlayerRol) +'.'});
     }
 
     // Als de actieve speler een lagere rol had, verwijder deze dan

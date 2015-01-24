@@ -43,11 +43,15 @@ $(function () {
     var cardsLeftDiv = document.getElementById("cardsleft");
     var gewonnenBerichtP = document.getElementById("gewonnen_bericht");
     var guardAreaDiv = document.getElementById("guardArea");
+    var generalInfoBoxP= document.getElementById("generalinfobox");
     var gameInfoBoxP= document.getElementById("gameinfobox");
     var startButtonDiv = document.getElementById("startButton");
+    var stopButtonDiv = document.getElementById("stopButton");
 
     var cardHTMLclasses = ['guard','priest','baron','handmaid','prince','king','countess','princess'];
     var roleNames = ['Guard','Priest','Baron','Handmaid','Prince','King','Countess','Princess'];
+
+    var myName = null;
     
     // Variabelen die de status bijhouden van de speler die is gekoppeld aan deze client
     var myPlayerID = -1;
@@ -65,6 +69,7 @@ $(function () {
     // Koppel wat klikfuncties aan de juiste elementen
     
     startButtonDiv.addEventListener("click", clickStart, false);
+    stopButtonDiv.addEventListener("click", clickStop, false);
 
     // Het koppelen van eventlisteners aan de 7 guardbuttons (hebben dezelfde class) moet simpeler kunnen dan dit, maar goed het werkt iig:
     var guardButtons = guardAreaDiv.childNodes;
@@ -104,6 +109,10 @@ $(function () {
         // wat ie ermee moet doen. We gaan hieronder simpelweg alle bekende mogelijkheden voor het 'type' af.
 
         switch(json.type) {
+            case 'askName':
+                askName();
+                break;
+
             case 'resetGame':
                 resetGame();
                 break;
@@ -117,7 +126,7 @@ $(function () {
                 break;
 
             case 'createPlayerList':
-                createPlayerList(json.data.aantalSpelers);
+                createPlayerList(json.data.namen);
                 break;
 
             case 'spelStart':
@@ -149,7 +158,7 @@ $(function () {
                 break;
 
             case 'wachtOpRolKeuzeVoorGuard':
-                wachtOpRolKeuzeVoorGuard(json.data.doelwitPlayerID);
+                wachtOpRolKeuzeVoorGuard(json.data.targetPlayerName);
                 break
 
             case 'leverRolIn':
@@ -162,6 +171,10 @@ $(function () {
 
             case 'gameEnd':
                 gameEnd(json.data.winnaar);
+                break;
+
+            case 'generalinfo':
+                generalinfo(json.data.bericht);
                 break;
 
             case 'gameinfo':
@@ -182,6 +195,11 @@ $(function () {
         //console.log('start geklikt');
     }
 
+    function clickStop() {
+        stuurJSONbericht('stop',{}); // vervolgens sturen we de ID als een tekstberichtje naar de server.
+        //console.log('start geklikt');
+    }
+
     function clickCard(){
         var rol = parseInt(this.innerHTML);
         stuurJSONbericht('kaartKlik',{rol: rol});
@@ -192,9 +210,11 @@ $(function () {
             var selectedPlayerDiv = this;
 
             // Vind uit op welke speler is geklikt
+            console.log(playerList.childNodes.length)
             for (var i = 0; i < playerList.childNodes.length; i++) {
                 if (playerList.childNodes[i] == selectedPlayerDiv) {
                     var gekozenDoelwitPlayerID = i;
+                    console.log(gekozenDoelwitPlayerID);
                     stuurJSONbericht('doelwitKeuze',{gekozenDoelwitPlayerID:gekozenDoelwitPlayerID});
                 }
             }
@@ -213,6 +233,13 @@ $(function () {
 
 // FUNCTIES GEKOPPELD AAN SERVERINPUT
 
+    function askName(){
+        myName = prompt("Please enter your name", "");
+        if (myName != null && myName != "") {
+            stuurJSONbericht('enteredName',{enteredName:myName});
+        }
+    }
+
     function wachtOpDoelwit(rol){
         waitingForPlayerSelection = true;
         notificatiebox.innerHTML = 'Selecteer een speler als doelwit voor de ' + rolNaam(rol) + '...';
@@ -223,9 +250,9 @@ $(function () {
         notificatiebox.innerHTML = '';
     }
 
-    function wachtOpRolKeuzeVoorGuard(targetPlayerID){
+    function wachtOpRolKeuzeVoorGuard(targetPlayerName){
         $("#guardArea").removeClass("invisible");
-        notificatiebox.innerHTML = 'Raad welke rol speler ' + targetPlayerID + ' heeft...';
+        notificatiebox.innerHTML = 'Raad welke rol ' + targetPlayerName + ' heeft...';
     }
 
     function receivePlayerID(playerID){
@@ -239,19 +266,21 @@ $(function () {
         }
     }
 
-    function createPlayerList(aantalSpelers) {
+    function createPlayerList(namen) {
         //console.log('spelerlijst maken voor ' + aantalSpelers + ' spelers');
 
-        for (var playerID = 0; playerID < aantalSpelers; playerID++) { 
+        for (var i = 0; i < namen.length; i++) { 
             var playerNameDiv = document.createElement('div');
 
             playerNameDiv.className = 'playerName';
 
-            if (playerID == myPlayerID) {
+            var newPlayerName = namen[i];
+
+            if (newPlayerName == myName) {
                 playerNameDiv.className = playerNameDiv.className + ' ownName';
             }
 
-            playerNameDiv.innerHTML = "Player " + playerID;
+            playerNameDiv.innerHTML = newPlayerName;
             playerNameDiv.addEventListener("click",clickPlayer,false);
             
             playerListDiv.appendChild(playerNameDiv);
@@ -261,13 +290,14 @@ $(function () {
     function resetGame(){
         // verwijder kaarten en spelers
         $("#playArea").children(".card").remove();
-        $("#sidebar").children(".playerName").remove();
+        $("#playerList").children(".playerName").remove();
 
         // haal de notificaties weg
         gameInfoBoxP.innerHTML = "";
 
         // toon startknop
         startButtonDiv.style.display = "block";
+        stopButtonDiv.style.display = "none";
 
         myPlayerID = -1;
         iAmActive = false;
@@ -277,6 +307,8 @@ $(function () {
 
     function spelStart(){
         startButtonDiv.style.display = "none";
+        stopButtonDiv.style.display = "block";
+        gameInfoBoxP.innerHTML = "";
         gewonnenBerichtP.innerHTML = "";
     }
 
@@ -325,7 +357,13 @@ $(function () {
     }
 
     function gameEnd(winnaar){
-        gewonnenBerichtP.innerHTML = 'Speler ' + winnaar + ' heeft gewonnen!';
+        gewonnenBerichtP.innerHTML = winnaar + ' heeft gewonnen!';
+        startButtonDiv.style.display = "block";
+        stopButtonDiv.style.display = "none";
+    }
+
+    function generalinfo(bericht){
+        generalInfoBoxP.innerHTML = bericht + '<br>' + generalInfoBoxP.innerHTML;
     }
 
     function gameinfo(bericht){

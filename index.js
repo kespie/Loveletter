@@ -60,6 +60,10 @@ wss.on('connection', function(connection) {
 
     var myClientObject = addClient(connection,clientID);
 
+    for (i=0;i<clients.length - 1;i++){
+        stuurAlgemeenBericht('generalinfo',myClientObject,{bericht: huidigeTijd() + ' Aanwezig: ' + clients[i].clientname});
+    }
+
     var json = JSON.stringify({ type: 'askName', data: {}});
     connection.send(json);
 
@@ -511,6 +515,8 @@ function ontneemRolAanSpeler(rol,playerID){
 function legRolOpen(playerID,rol) {
     var player = players[playerID];
     player.openRollen.push(rol);
+
+    stuurSpelBericht('openRol', players, {playerID: player.playerID, rolID: rol});
 
     if (rol == 8) {
         killPlayer(playerID);

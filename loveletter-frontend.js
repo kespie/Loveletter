@@ -164,6 +164,10 @@ $(function () {
                 leverRolIn(json.data.rol);
                 break;
 
+            case 'openRol':
+                openRol(json.data.playerID,json.data.rolID);
+                break
+
             case 'playerDied':
                 playerDied(json.data.jsonPlayerID);
                 break;
@@ -355,7 +359,6 @@ $(function () {
     }
 
     function gameEnd(winnaar){
-        gewonnenBerichtP.innerHTML = winnaar + ' heeft gewonnen!';
         startButtonDiv.style.display = "block";
         stopButtonDiv.style.display = "none";
     }
@@ -375,6 +378,10 @@ $(function () {
         playAreaDiv.removeChild(myCards[kaartIndexInHand]);
         myRoles.splice(kaartIndexInHand,1);
         myCards.splice(kaartIndexInHand,1);
+    }
+
+    function openRol(playerID,rolID) {
+        // TODO zorg dat op de een of andere manier zichtbaar wordt dat die speler die rol nu voor zich heeft liggen!
     }
 
     function rolNaam(rolID) {

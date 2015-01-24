@@ -40,25 +40,21 @@ body{
     width: 150px;
 }
 
-.sidebarheader{
+.infobox{
     height:100px;
     width:100%;
     color:#000;
     border-bottom: solid 1px;
 }
 
-.gameControl{
+.startButton{
     width: 50%;
     padding-top: 25px;
     float: left;
 }
 
-.gameControl button{
-    font-size: 2em;;
-}
-
-#stopButton{
-    display: none
+.startButton button{
+    font-size: 2em;
 }
 
 .cardsleft{
@@ -195,7 +191,7 @@ body{
     padding-left: 20px;
 }
 
-.infobox{
+#gameinfobox{
     font-size: 1.0em;
     color: #000;
     width: 90%;
@@ -203,5 +199,5 @@ body{
     text-align: left;
     padding-left: 20px;
     overflow-y: scroll;
-    max-height: 300px;
+    max-height: 400px;
 }

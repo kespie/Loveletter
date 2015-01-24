@@ -43,15 +43,11 @@ $(function () {
     var cardsLeftDiv = document.getElementById("cardsleft");
     var gewonnenBerichtP = document.getElementById("gewonnen_bericht");
     var guardAreaDiv = document.getElementById("guardArea");
-    var generalInfoBoxP= document.getElementById("generalinfobox");
     var gameInfoBoxP= document.getElementById("gameinfobox");
     var startButtonDiv = document.getElementById("startButton");
-    var stopButtonDiv = document.getElementById("stopButton");
 
     var cardHTMLclasses = ['guard','priest','baron','handmaid','prince','king','countess','princess'];
     var roleNames = ['Guard','Priest','Baron','Handmaid','Prince','King','Countess','Princess'];
-
-    var myName = null;
     
     // Variabelen die de status bijhouden van de speler die is gekoppeld aan deze client
     var myPlayerID = -1;
@@ -69,7 +65,6 @@ $(function () {
     // Koppel wat klikfuncties aan de juiste elementen
     
     startButtonDiv.addEventListener("click", clickStart, false);
-    stopButtonDiv.addEventListener("click", clickStop, false);
 
     // Het koppelen van eventlisteners aan de 7 guardbuttons (hebben dezelfde class) moet simpeler kunnen dan dit, maar goed het werkt iig:
     var guardButtons = guardAreaDiv.childNodes;
@@ -109,10 +104,6 @@ $(function () {
         // wat ie ermee moet doen. We gaan hieronder simpelweg alle bekende mogelijkheden voor het 'type' af.
 
         switch(json.type) {
-            case 'askName':
-                askName();
-                break;
-
             case 'resetGame':
                 resetGame();
                 break;
@@ -126,7 +117,7 @@ $(function () {
                 break;
 
             case 'createPlayerList':
-                createPlayerList(json.data.namen);
+                createPlayerList(json.data.aantalSpelers);
                 break;
 
             case 'spelStart':
@@ -173,10 +164,6 @@ $(function () {
                 gameEnd(json.data.winnaar);
                 break;
 
-            case 'generalinfo':
-                generalinfo(json.data.bericht);
-                break;
-
             case 'gameinfo':
                 gameinfo(json.data.bericht);
                 break;
@@ -192,11 +179,6 @@ $(function () {
     // In dit geval wordt er dan een bericht naar de server gestuurd, waarin het id vermeld wordt van de knop waarop geklikt is.
     function clickStart() {
         stuurJSONbericht('start',{}); // vervolgens sturen we de ID als een tekstberichtje naar de server.
-        //console.log('start geklikt');
-    }
-
-    function clickStop() {
-        stuurJSONbericht('stop',{}); // vervolgens sturen we de ID als een tekstberichtje naar de server.
         //console.log('start geklikt');
     }
 
@@ -231,13 +213,6 @@ $(function () {
 
 // FUNCTIES GEKOPPELD AAN SERVERINPUT
 
-    function askName(){
-        myName = prompt("Please enter your name", "");
-        if (myName != null && myName != "") {
-            stuurJSONbericht('enteredName',{enteredName:myName});
-        }
-    }
-
     function wachtOpDoelwit(rol){
         waitingForPlayerSelection = true;
         notificatiebox.innerHTML = 'Selecteer een speler als doelwit voor de ' + rolNaam(rol) + '...';
@@ -264,21 +239,19 @@ $(function () {
         }
     }
 
-    function createPlayerList(namen) {
+    function createPlayerList(aantalSpelers) {
         //console.log('spelerlijst maken voor ' + aantalSpelers + ' spelers');
 
-        for (var i = 0; i < namen.length; i++) { 
+        for (var playerID = 0; playerID < aantalSpelers; playerID++) { 
             var playerNameDiv = document.createElement('div');
 
             playerNameDiv.className = 'playerName';
 
-            var newPlayerName = namen[i];
-
-            if (newPlayerName == myName) {
+            if (playerID == myPlayerID) {
                 playerNameDiv.className = playerNameDiv.className + ' ownName';
             }
 
-            playerNameDiv.innerHTML = newPlayerName;
+            playerNameDiv.innerHTML = "Player " + playerID;
             playerNameDiv.addEventListener("click",clickPlayer,false);
             
             playerListDiv.appendChild(playerNameDiv);
@@ -288,14 +261,13 @@ $(function () {
     function resetGame(){
         // verwijder kaarten en spelers
         $("#playArea").children(".card").remove();
-        $("#playerList").children(".playerName").remove();
+        $("#sidebar").children(".playerName").remove();
 
         // haal de notificaties weg
         gameInfoBoxP.innerHTML = "";
 
         // toon startknop
         startButtonDiv.style.display = "block";
-        stopButtonDiv.style.display = "none";
 
         myPlayerID = -1;
         iAmActive = false;
@@ -305,8 +277,6 @@ $(function () {
 
     function spelStart(){
         startButtonDiv.style.display = "none";
-        stopButtonDiv.style.display = "block";
-        gameInfoBoxP.innerHTML = "";
         gewonnenBerichtP.innerHTML = "";
     }
 
@@ -356,12 +326,6 @@ $(function () {
 
     function gameEnd(winnaar){
         gewonnenBerichtP.innerHTML = 'Speler ' + winnaar + ' heeft gewonnen!';
-        startButtonDiv.style.display = "block";
-        stopButtonDiv.style.display = "none";
-    }
-
-    function generalinfo(bericht){
-        generalInfoBoxP.innerHTML = bericht + '<br>' + generalInfoBoxP.innerHTML;
     }
 
     function gameinfo(bericht){

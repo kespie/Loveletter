@@ -8,30 +8,48 @@ body{
     color:#000;
     margin: 0;
     background:#eee;
+    font-family: 'Niconne', cursive;
+    font-size:1.6em;
 }
 
 section{
     width:100%;
     float:left;
+    border-bottom: solid 1px rgb(222, 222, 222);
+    margin-top: 20px;
+}
+
+.container{
+    max-width: 1000px;
+    margin: 0 auto;
+    padding:0 20px; 
 }
 
 section.top{
-    /*background-color:blue;*/
+    margin-top: 0;
 }
 
-.sidebar{
-    
+section.bottom{
+    border-bottom:none;
 }
 
-.playArea{
+.left{
+    width: 48%;
     float: left;
-    width:100%;
-    max-width: 1000px;
-    margin: 0 auto;
+    margin-right:4%;
+}
+
+.right{
+    width:48%;
+    float:left;
+}
+
+button{
+    font-family: 'Niconne', cursive;
 }
 
 .guardArea{
-    float: right;
+   font-size: 1em;
 }
 
 .invisible{
@@ -52,30 +70,40 @@ section.top{
 }
 
 .gameControl{
-    float: left;
-    width:100%;
     max-width: 1000px;
     margin: 0 auto;
+    text-align: center;
 }
 
 .gameControl button{
-    font-size: 2em;;
+    font-size: 3em;
+    margin-top: 15%;
+    padding: 20px;
+    border-radius: 50px;
 }
 
 #stopButton{
     display: none
 }
 
+#stopbutton button{
+    font-size: 2em;
+    margin-top: 0;
+    padding: 9px;
+    border-radius: 20px;
+}
+
 .cardsleft{
-    width:50%;
-    float: left;
     padding-top: 30px;
+    width:50%;
 }
 
 .cardsleft p{
     margin:0;
     font-size: 1.5em;
 }
+
+
 
 
 /* ----- Opmaak spelersgedeelte ----- */
@@ -87,8 +115,6 @@ section.top{
 .playerName{
     color: gray;
     padding: 10px;
-    margin: 20px;
-    font-size: 2em;
     font-weight: bold;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -107,7 +133,8 @@ section.top{
 }
 
 .activePlayer{
-    border:solid 1px green;
+    border: solid 1px green;
+    background: rgb(216, 253, 216);
 }
 
 .dead{
@@ -192,21 +219,36 @@ section.top{
 
 /* ----- Notificaties  ----- */
 
-#notificatiebox{
-    font-size: 1.5em;
-    color: #000;
-    width: 75%;
-    float: left;
-    padding-left: 20px;
+
+ul.infobox{
+    overflow-y: scroll;
+    height: 300px;
+    list-style: none;
+    padding:0;
+    
 }
 
-.infobox{
-    font-size: 1.0em;
-    color: #000;
-    width: 90%;
-    float: left;
-    text-align: left;
-    padding-left: 20px;
-    overflow-y: scroll;
-    max-height: 300px;
+ul.infobox li{
+    padding: 10px 20px;
+    border-bottom: solid 1px rgb(222, 222, 222);
 }
+
+#generalinfobox{
+    padding: 10px 20px;
+    border: solid 1px rgb(222, 222, 222);
+    margin:0;
+    overflow-y: scroll;
+    height: 200px;
+}
+
+@media screen and (min-width: 1000px) {
+
+    section{
+        width:49%;
+    }
+    section.top{
+        border-right: solid 1px rgb(222, 222, 222);
+    }
+
+}
+

@@ -4,59 +4,76 @@
 
     <script src="loveletter-frontend.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
+    <link href='http://fonts.googleapis.com/css?family=Niconne' rel='stylesheet' type='text/css'>
   </head>
   <body>
 
     <section class="top">
-        <div class="gameControl" id="startButton">
-            <button>Start</button>
-            <div class="card cardfiller"></div>
-        </div>
-        <div class="playArea" id="playArea">
+        <div class="container">
+            <div class="gameControl" id="startButton">
+                <button>Start</button>
+                <div class="card cardfiller"></div>
+            </div>
+            <div class="playArea" id="playArea">
 
+            </div>
         </div>
     </section>
 
     <section class="middle">
-        <div class="cardsleft" id="cardsleft">
-            <!-- hierbinnen worden divs toegevoegd voor de player names -->
+        <div class="container">
+            <div class="left">
+                <div class="cardsleft" id="cardsleft">
+                    <!-- hierbinnen worden divs toegevoegd voor de player names -->
+                </div>
+
+                <div class="playerList" id="playerList">
+                    <!-- hierbinnen worden divs toegevoegd voor de player names -->
+                </div>
+                <p id="notificatiebox"></p>
+                <form>
+                    <select class = "guardArea invisible" id="guardArea">
+                        <option value="nothing" selected="selected">Selecteer een rol</option>
+                        <option class = "guardButton" value="2"> 2: Priest</option>
+                        <br>
+                        <option class = "guardButton" value="3"> 3: Baron</option>
+                        <br>
+                        <option class = "guardButton" value="4"> 4: Handmaid</option>
+                        <br>
+                        <option class = "guardButton" value="5"> 5: Prince</option>
+                        <br>
+                        <option class = "guardButton" value="6"> 6: King</option>
+                        <br>
+                        <option class = "guardButton" value="7"> 7: Countess</option>
+                        <br>
+                        <option class = "guardButton" value="8"> 8: Princess</option>
+                    </select>
+                </form>
+            </div>
+            <div class="right">
+                <ul class="infobox" id ="gameinfobox">
+                    <!-- hierbinnen worden voortgangberichten gepost -->
+                </ul>
+            </div>
         </div>
-        <div class="playerList" id="playerList">
-            <!-- hierbinnen worden divs toegevoegd voor de player names -->
-        </div>
-        <p class="infobox" id ="gameinfobox">
-            <!-- hierbinnen worden voortgangberichten gepost -->
-        </p>
     </section>
 
 
     <section class="bottom">
-        <p class="infobox" id ="generalinfobox">
-            <!-- hierbinnen worden voortgangberichten gepost -->
-        </p>
-        <div class="gameControl" id="stopButton">
-            <button>Stop</button>
+        <div class="container">
+            <div class="left">
+                <p class="infobox" id ="generalinfobox">
+                    <!-- hierbinnen worden voortgangberichten gepost -->
+                </p>
+            </div>
+            <div class="right">
+                <div class="gameControl" id="stopButton">
+                    <button>Stop</button>
+                </div>
+            </div>
         </div>
-        <p id="notificatiebox"></p>
     </section>
 
-    <form>
-        <select class = "guardArea invisible" id="guardArea">
-            <option value="nothing" selected="selected">Selecteer een rol</option>
-            <option class = "guardButton" value="2"> 2: Priest</option>
-            <br>
-            <option class = "guardButton" value="3"> 3: Baron</option>
-            <br>
-            <option class = "guardButton" value="4"> 4: Handmaid</option>
-            <br>
-            <option class = "guardButton" value="5"> 5: Prince</option>
-            <br>
-            <option class = "guardButton" value="6"> 6: King</option>
-            <br>
-            <option class = "guardButton" value="7"> 7: Countess</option>
-            <br>
-            <option class = "guardButton" value="8"> 8: Princess</option>
-        </div>
-    </form>
+    
   </body>
 </html>

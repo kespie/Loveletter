@@ -204,7 +204,6 @@ function startGame(){
 
     console.log("Het spel is gestart!");
     stuurSpelBericht('gameinfo', players ,{bericht: '--- Start van spel ---'});
-    stuurSpelBericht('gameinfo', players ,{bericht: ''});
     stuurSpelBericht('generalinfo', players ,{bericht: huidigeTijd() + ' Het spel is gestart!'});
 }
 
@@ -400,7 +399,7 @@ function playPrince() {
     stuurSpelBericht('gameinfo',players,{bericht: '>> '+ players[doelwitPlayerID].playerName + ' had een ' + rolNaam(targetPlayerRole) +'.'});
     
     ontneemRolAanSpeler(targetPlayerRole,doelwitPlayerID);
-    legRolOpen(activePlayerID,targetPlayerRole);
+    legRolOpen(doelwitPlayerID,targetPlayerRole);
     
     // Het doelwit moet een nieuwe rol krijgen van de stapel
     var nieuweRol = haalRolVanStapel();
@@ -578,6 +577,9 @@ function endGame(){
             var playerID = player.playerID;
             var myLastRole = huidigeSpelerRol(playerID);
 
+            ontneemRolAanSpeler(myLastRole,playerID);
+            legRolOpen(playerID,myLastRole);
+
             // sommeer de waarde van open rolllen
             var mijnOpenRolSom = [];
             if (player.openRollen.length > 0) {
@@ -591,7 +593,6 @@ function endGame(){
             if (myLastRole > highestRoleLeft) {
                 openRollenGevenDoorslag = false;
                 ikStaVoor = true;
-                
             }
             else if (myLastRole == highestRoleLeft) {
                 openRollenGevenDoorslag = true;
@@ -604,7 +605,7 @@ function endGame(){
             if (ikStaVoor) {
                 highestRoleLeft = myLastRole;
                 hoogsteOpenRolSom = mijnOpenRolSom;
-                winnerID = player.playerID;
+                winnerID = playerID;
             }
         }
     }
